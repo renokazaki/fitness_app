@@ -8,10 +8,7 @@ const Header = () => {
         <Link href="/" className="text-base font-bold text-sky-600">
           Fitness Tracker
         </Link>
-        <nav className="flex items-center  text-white">
-          <Button variant="ghost" asChild>
-            <Link href="/activities">Activities</Link>
-          </Button>
+        <nav className="flex items-center  text-black">
           <Button variant="ghost" asChild>
             <Link href="/workouts">Work Outs</Link>
           </Button>
@@ -19,7 +16,7 @@ const Header = () => {
             <Link href="/meals">Meals</Link>
           </Button>
           <Button variant="ghost" asChild>
-            <Link href="/profile">Plofile</Link>
+            <Link href="/activities">Activities</Link>
           </Button>
         </nav>
       </div>
