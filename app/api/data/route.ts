@@ -5,26 +5,25 @@ import { prisma } from '@/lib/prisma'
 // 全データ取得用API
 export async function GET() {
   try {
-    // Prismaを使用してデータを取得
-    const activities = await prisma.smoke.findMany({
-      select: {
-        id: true,
-        many: true,
-        cost: true,
-      }
-    });
+    // データベース接続テスト
+    await prisma.$connect();
+    console.log('Database connected successfully');
 
-    // デバッグ用のログ
-    console.log('Fetched activities:', activities);
+    const activities = await prisma.smoke.findMany();
+    console.log('Fetched data:', activities);  // データ取得の確認
 
     return NextResponse.json(activities);
   } catch (error) {
-    console.error('Error fetching activities:', error);
-    // エラーの詳細を返す
+    console.error('Database error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch activities' },
+      { 
+        error: 'Database error', 
+        stack: process.env.NODE_ENV === 'development'  
+      }, 
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
