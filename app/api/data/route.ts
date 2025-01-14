@@ -3,28 +3,28 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 // 全データ取得用API
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    // Prismaを使用してsmokeの全てのデータを取得
-    const activities = await prisma.smoke.findMany()
+    // Prismaを使用してデータを取得
+    const activities = await prisma.smoke.findMany({
+      select: {
+        id: true,
+        many: true,
+        cost: true,
+      }
+    });
 
-    // データを整形してレスポンスとして返す
-    const activitiesData = activities.map(activity => ({
-      id: activity.id,
-      many: activity.many,
-      cost: activity.cost,
-    }))
+    // デバッグ用のログ
+    console.log('Fetched activities:', activities);
 
-    return NextResponse.json(activitiesData)
-  } catch (err) {
-    console.error('Error fetching activities:', err)
+    return NextResponse.json(activities);
+  } catch (error) {
+    console.error('Error fetching activities:', error);
+    // エラーの詳細を返す
     return NextResponse.json(
       { error: 'Failed to fetch activities' },
       { status: 500 }
-    )
-  } finally {
-    console.log('GETリクエストが完了しました')
-    console.log(request)
+    );
   }
 }
 

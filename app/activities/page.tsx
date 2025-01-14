@@ -22,9 +22,14 @@ export default function ActivitiesPage() {
   useEffect(() => {
     async function fetchActivities() {
       try {
-        const response = await fetch("/api/data"); // APIエンドポイントを呼び出し
+        const response = await fetch("/api/data");
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.details || "Failed to fetch data");
+        }
         const data = await response.json();
-        setActivities(data); // データをstateに保存
+        console.log("Received data:", data); // デバッグ用
+        setActivities(data);
       } catch (error) {
         console.error("データの取得中にエラーが発生しました:", error);
       }
