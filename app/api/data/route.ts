@@ -24,6 +24,7 @@ export async function GET(request: Request) {
     )
   } finally {
     console.log('GETリクエストが完了しました')
+    console.log(request)
   }
 }
 

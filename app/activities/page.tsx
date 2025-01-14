@@ -18,7 +18,6 @@ interface Activity {
 // メインのコンポーネント
 export default function ActivitiesPage() {
   const [activities, setActivities] = useState<Activity[]>([]); // データを保存するstate
-  const [loading, setLoading] = useState(true); // ローディング状態
   // APIからデータを取得
   useEffect(() => {
     async function fetchActivities() {
@@ -28,8 +27,6 @@ export default function ActivitiesPage() {
         setActivities(data); // データをstateに保存
       } catch (error) {
         console.error("データの取得中にエラーが発生しました:", error);
-      } finally {
-        setLoading(false); // ローディングを終了
       }
     }
 
