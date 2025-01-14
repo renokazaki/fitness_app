@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react"; // アイコンライブラリから矢印アイコンをインポート
 // import { Card, CardContent } from "@/components/ui"; // UIコンポーネントのインポート（必要に応じて変更）
 
@@ -9,8 +9,33 @@ interface DayObject {
   isCurrentMonth: boolean; // 現在の月に属しているかどうか
 }
 
+interface Activity {
+  id: number;
+  many: number;
+  cost: number;
+}
+
 // メインのコンポーネント
 export default function ActivitiesPage() {
+  const [activities, setActivities] = useState<Activity[]>([]); // データを保存するstate
+  const [loading, setLoading] = useState(true); // ローディング状態
+  // APIからデータを取得
+  useEffect(() => {
+    async function fetchActivities() {
+      try {
+        const response = await fetch("/api/data"); // APIエンドポイントを呼び出し
+        const data = await response.json();
+        setActivities(data); // データをstateに保存
+      } catch (error) {
+        console.error("データの取得中にエラーが発生しました:", error);
+      } finally {
+        setLoading(false); // ローディングを終了
+      }
+    }
+
+    fetchActivities();
+  }, []);
+
   // 現在の月を保持する状態
   const [currentMonth, setCurrentMonth] = useState(new Date());
   // 選択された日付を保持する状態
@@ -22,9 +47,9 @@ export default function ActivitiesPage() {
   // 健康データ（仮データ）
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fitnessData: Record<string, any> = {
-    "2025-01-01": { steps: 5000, calories: 300 }, // 1月1日のデータ
-    "2025-01-02": { steps: 7000, calories: 500 }, // 1月2日のデータ
-    "2025-02-03": { steps: 7000, calories: 500 }, // 1月2日のデータ
+    "2025-01-01": { many: 5000, cost: 300 }, // 1月1日のデータ
+    "2025-01-02": { many: 7000, cost: 500 }, // 1月2日のデータ
+    "2025-02-03": { many: 7000, cost: 500 }, // 1月2日のデータ
   };
 
   // 指定された月の日付一覧を取得する関数
@@ -84,8 +109,12 @@ export default function ActivitiesPage() {
     // データがある場合の表示内容
     return (
       <div>
-        <p>歩数: {data.steps}</p>
-        <p>消費カロリー: {data.calories} kcal</p>
+        {activities.map((item) => (
+          <div key={item.id}>
+            <div>{item.many}</div>
+            <div>{item.cost}</div>
+          </div>
+        ))}
       </div>
     );
   };
