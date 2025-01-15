@@ -1,9 +1,12 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
+import { PrismaClient } from '@prisma/client';
 
 export async function POST(req: Request) {
   const SIGNING_SECRET = process.env.SIGNING_SECRET
+
+  const prisma = new PrismaClient();
 
   if (!SIGNING_SECRET) {
     throw new Error('Error: Please add SIGNING_SECRET from Clerk Dashboard to .env or .env.local')
@@ -45,9 +48,22 @@ export async function POST(req: Request) {
     })
   }
 
-  // ユーザー作成イベントの処理
-  if (evt.type === 'user.created') {
-    console.log('userId:================-', evt.data.id)
+   // ユーザー作成イベントの処理
+   if (evt.type === 'user.created') {
+    const userId = evt.data.id; // Clerk からの userId
+
+    try {
+      // ユーザーをデータベースに挿入
+      await prisma.user.create({
+        data: {
+          userId: userId,
+        },
+      });
+      console.log(`User with ID ${userId} created successfully.`);
+    } catch (err) {
+      console.error('Error inserting user into database:', err);
+      return new Response('Error: Database operation failed', { status: 500 });
+    }
   }
 
   return new Response('Webhook received', { status: 200 })
