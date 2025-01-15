@@ -1,10 +1,14 @@
 // app/api/activities/route.ts
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+// import { auth } from '@clerk/nextjs/server';
 
 // 全データ取得用API
 export async function GET() {
   try {
+
+   
+
     // データベース接続テスト
     await prisma.$connect();
     console.log('Database connected successfully');
@@ -31,19 +35,53 @@ export async function GET() {
 // データ投稿投稿用API
 export async function POST(request: Request) {
   try {
-const {many,cost} = await request.json()
 
-    // Prismaを使用して全てのデータを取得
-    const activities = await prisma.smoke.create({data:{many,cost}})
+    // const { userId } = await auth();
+    // console.log("aaaaaaaaaaaaaaaaaaaa"+ userId)
 
-    return NextResponse.json(activities)
+    const body = await request.json();
+    const many = Number(body.many);
+    const cost = Number(body.cost);
+    const userId = String(body.userId);
+
+    // データのバリデーション
+    if (!userId || isNaN(many) || isNaN(cost)) {
+      return new NextResponse(
+        JSON.stringify({ error: 'Invalid or missing data' }), 
+        { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Prismaを使用してデータを作成
+    const activities = await prisma.smoke.create({
+      data: {
+        many,
+        cost,
+        userId,
+      },
+    });
+
+    return new NextResponse(
+      JSON.stringify({ success: true, data: activities }), 
+      { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+
   } catch (err) {
-    console.error('Error posting activities:', err)
-    return NextResponse.json(
-      { error: 'Failed to post activities' },
-      { status: 500 }
-    )
-  } finally {
-    console.log('POSTリクエストが完了しました')
+    // err が null または undefined の場合に対応
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Error posting activities:', errorMessage);
+    return new NextResponse(
+      JSON.stringify({ error: 'Failed to post activities', details: errorMessage }), 
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
   }
 }
